@@ -37,6 +37,7 @@ if (!class_exists('woocommerce_stripe_suporterClass')) {
             
             add_action( 'admin_init',  array($this, 'removeMenuPage') );
 
+            add_action( 'init',  array($this, 'wss_register_vendor_custom_stripe_fields') );
             // registers vendor menus
             add_action( 'admin_menu', array($this, 'register_vendor_menus' ) );
             add_filter( 'wc_stripe_payment_request_params', array( $this, 'wc_stripe_payment_request_params_function'), 10, 3 );
@@ -44,18 +45,150 @@ if (!class_exists('woocommerce_stripe_suporterClass')) {
             // add_action('wp_head', array($this, 'testF'));
         }
 
+        function wss_register_vendor_custom_stripe_fields(){
+            // add_action( 'end_wcfm_dokan_settings',  array($this, 'wss_end_wcfm_dokan_settings') );
+            // add_action( 'end_wcfm_marketplace_settings',  array($this, 'wss_end_wcfm_marketplace_settings') );
+            // add_action( 'end_wcfm_wcmarketplace_settings',  array($this, 'wss_end_wcfm_wcmarketplace_settings') );
+            add_action( 'end_wcfm_vendor_settings',  array($this, 'wss_end_wcfm_vendor_settings') );
+            // add_action( 'end_wcfm_wcvendors_settings',  array($this, 'wss_end_wcfm_wcvendors_settings') );
+        }
+
+        function wss_end_wcfm_dokan_settings( $user_id ){
+        ?>
+            <div class="page_collapsible" id="wcfm_settings_form_stripe_head">
+                <label class="fab fa-tripadvisor"></label>
+                <?php _e('Stripe Settings', 'wc-frontend-manager'); ?><span></span>
+            </div>
+            <div class="wcfm-container">
+                <div id="wcfm_settings_form_stripe_expander" class="wcfm-content">
+                    <?php
+                        $WCFM->wcfm_fields->wcfm_generate_form_field( apply_filters( 'wcfm_vendors_settings_fields_stripe', array(
+                            "publickey" => array('label' => __('Stripe Public Key', 'wc-frontend-manager') , 'type' => 'text', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title wcfm_ele', 'value' => $publickey, 'hints' => __( 'Enter Your Stripe Public Key.', 'wc-frontend-manager' ) ),
+                            "secretkey" => array('label' => __('Stripe Secret Key', 'wc-frontend-manager') , 'type' => 'text', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title wcfm_ele', 'value' => $secretkey, 'hints' => __( 'Enter Your Stripe Secret Key.', 'wc-frontend-manager' ) ),
+                            ) ) );
+                    ?>
+                </div>
+            </div>
+            <div class="wcfm_clearfix"></div>
+        <?php 
+        }
+
+        function wss_end_wcfm_marketplace_settings( $user_id ){
+        ?>
+            <div class="page_collapsible" id="wcfm_settings_form_stripe_head">
+                <label class="fab fa-tripadvisor"></label>
+                <?php _e('Stripe Settings', 'wc-frontend-manager'); ?><span></span>
+            </div>
+            <div class="wcfm-container">
+                <div id="wcfm_settings_form_stripe_expander" class="wcfm-content">
+                    <?php
+                        $WCFM->wcfm_fields->wcfm_generate_form_field( apply_filters( 'wcfm_vendors_settings_fields_stripe', array(
+                            "publickey" => array('label' => __('Stripe Public Key', 'wc-frontend-manager') , 'type' => 'text', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title wcfm_ele', 'value' => $publickey, 'hints' => __( 'Enter Your Stripe Public Key.', 'wc-frontend-manager' ) ),
+                            "secretkey" => array('label' => __('Stripe Secret Key', 'wc-frontend-manager') , 'type' => 'text', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title wcfm_ele', 'value' => $secretkey, 'hints' => __( 'Enter Your Stripe Secret Key.', 'wc-frontend-manager' ) ),
+                            ), $user_id ) );
+                    ?>
+                </div>
+            </div>
+            <div class="wcfm_clearfix"></div>
+        <?php 
+        }
+
+        function wss_end_wcfm_wcmarketplace_settings( $user_id ){
+        ?>
+            <div class="page_collapsible" id="wcfm_settings_form_stripe_head">
+                <label class="fab fa-money-check"></label>
+                <?php _e('Stripe Settings', 'wc-frontend-manager'); ?><span></span>
+            </div>
+            <div class="wcfm-container">
+                <div id="wcfm_settings_form_stripe_expander" class="wcfm-content">
+                    <?php
+                    $WCFM->wcfm_fields->wcfm_generate_form_field( apply_filters( 'wcfm_vendors_settings_fields_stripe', array(
+                        "publickey" => array('label' => __('Stripe Public Key', 'wc-frontend-manager') , 'type' => 'text', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title wcfm_ele', 'value' => $publickey, 'hints' => __( 'Enter Your Stripe Public Key.', 'wc-frontend-manager' ) ),
+                        "secretkey" => array('label' => __('Stripe Secret Key', 'wc-frontend-manager') , 'type' => 'text', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title wcfm_ele', 'value' => $secretkey, 'hints' => __( 'Enter Your Stripe Secret Key.', 'wc-frontend-manager' ) ),
+                        ), $user_id ) );
+                    ?>
+                </div>
+            </div>
+            <div class="wcfm_clearfix"></div>
+        <?php 
+        }
+
+        function wss_end_wcfm_vendor_settings( $user_id ){
+            global $WCFM;
+
+            $wcfm_is_allow_manage_settings = apply_filters( 'wcfm_is_allow_manage_settings', true );
+            if( !$wcfm_is_allow_manage_settings ) {
+                wcfm_restriction_message_show( "Settings" );
+                return;
+            }
+
+            $vendor_data = WC_Product_Vendors_Utils::get_vendor_data_from_user();
+            $publickey            = ! empty( $vendor_data['publickey'] ) ? $vendor_data['publickey'] : '';
+            $secretkey            = ! empty( $vendor_data['secretkey'] ) ? $vendor_data['secretkey'] : '';
+            ?>
+            <div class="page_collapsible" id="wcfm_settings_form_stripe_head">
+                <label class="wcfmfa fa-money-check"></label>
+                <?php _e('Stripe Settings', 'wc-frontend-manager'); ?><span></span>
+            </div>
+            <div class="wcfm-container">
+                <div id="wcfm_settings_form_stripe_expander jony" class="wcfm-content">
+                    <?php
+                    $WCFM->wcfm_fields->wcfm_generate_form_field( apply_filters( 'wcfm_wcpvendors_settings_fields_store', array(
+                        "publickey" => array('label' => __('Stripe Public Key', 'wc-frontend-manager') , 'type' => 'text', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title wcfm_ele', 'value' => $publickey, 'hints' => __( 'Enter Your Stripe Public Key.', 'wc-frontend-manager' ) ),
+                        "secretkey" => array('label' => __('Stripe Secret Key', 'wc-frontend-manager') , 'type' => 'text', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title wcfm_ele', 'value' => $secretkey, 'hints' => __( 'Enter Your Stripe Secret Key.', 'wc-frontend-manager' ) ),
+                        ) ) );
+
+
+                    // $settings_fields_store = apply_filters( 'wcfm_wcpvendors_settings_fields_store', array(
+                    //     "wcfm_logo" => array('label' => __('Logo', 'wc-frontend-manager') , 'type' => 'upload', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title', 'prwidth' => 150, 'value' => $logo_image_url),
+                    //     "shop_name" => array('label' => __('Shop Name', 'wc-frontend-manager') , 'type' => 'text', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title wcfm_ele', 'value' => $shop_name, 'hints' => __( 'Your shop name is public and must be unique.', 'wc-frontend-manager' ) ),
+                    //     "email" => array('label' => __('Vendor Email', 'wc-frontend-manager') , 'type' => 'text', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title wcfm_ele', 'value' => $email, 'hints' => __( 'Enter the email for this vendor. This is the email where all notifications will be send such as new orders and customer inquiries. You may enter more than one email separating each with a comma.', 'wc-frontend-manager' ) ),
+                    //     "shop_description" => array('label' => __('Profile', 'wc-frontend-manager') , 'type' => $wpeditor, 'class' => 'wcfm-textarea wcfm_ele ' . $rich_editor, 'label_class' => 'wcfm_title', 'value' => $profile, 'hints' => __( 'Enter the profile information you would like for customer to see.', 'wc-frontend-manager' ) ),
+                    //     ) );
+                    // $WCFM->wcfm_fields->wcfm_generate_form_field( $settings_fields_store );
+                    ?>
+                </div>
+            </div>
+            <div class="wcfm_clearfix"></div>
+        <?php 
+        }
+
+        function wss_end_wcfm_wcvendors_settings( $user_id ){
+        ?>
+            <div class="page_collapsible" id="wcfm_settings_form_stripe_head">
+                <label class="fab fa-tripadvisor"></label>
+                <?php _e('Stripe Settings', 'wc-frontend-manager'); ?><span></span>
+            </div>
+            <div class="wcfm-container">
+                <div id="wcfm_settings_form_stripe_expander" class="wcfm-content">
+                    <?php
+                        $WCFM->wcfm_fields->wcfm_generate_form_field( apply_filters( 'wcfm_vendors_settings_fields_stripe', array(
+                            "publickey" => array('label' => __('Stripe Public Key', 'wc-frontend-manager') , 'type' => 'text', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title wcfm_ele', 'value' => $publickey, 'hints' => __( 'Enter Your Stripe Public Key.', 'wc-frontend-manager' ) ),
+                            "secretkey" => array('label' => __('Stripe Secret Key', 'wc-frontend-manager') , 'type' => 'text', 'class' => 'wcfm-text wcfm_ele', 'label_class' => 'wcfm_title wcfm_ele', 'value' => $secretkey, 'hints' => __( 'Enter Your Stripe Secret Key.', 'wc-frontend-manager' ) ),
+                            ), $user_id ) );
+                    ?>
+                </div>
+            </div>
+            <div class="wcfm_clearfix"></div>
+        <?php 
+        }
+
+
 
         
 
         public function testF(){
          
 
-            // echo 'ip : ' . get_option('ip') . '<br/>';
-            // echo 'real ip: ' . getUserIp() . '<br/>';
-            $secret_key = get_transient( 'secret_key_' . getUserIp() );
-            echo 'secreat key: ' . $secret_key . '<br/>';
+            $vendor_data = WC_Product_Vendors_Utils::get_vendor_data_from_user();
+            $publickey            = ! empty( $vendor_data['publickey'] ) ? $vendor_data['publickey'] : '';
+            $secretkey            = ! empty( $vendor_data['secretkey'] ) ? $vendor_data['secretkey'] : '';
 
-            echo 'from webhook: ' . get_option( 'secreakKey' ) . '<br/>';
+            echo 'secreat key: ' .  $secretkey  . '<br/>';
+
+            echo '<pre>';
+            print_r($vendor_data);
+            echo '</pre>';
 
         }
 
@@ -141,7 +274,7 @@ if (!class_exists('woocommerce_stripe_suporterClass')) {
             }
     
             $profile           = ! empty( $vendor_data['profile'] ) ? $vendor_data['profile'] : '';
-            $email             = ! empty( $vendor_data['email'] ) ? $vendor_data['email'] : '';
+            $secretkey             = ! empty( $vendor_data['secretkey'] ) ? $vendor_data['secretkey'] : '';
             $paypal            = ! empty( $vendor_data['paypal'] ) ? $vendor_data['paypal'] : '';
             $vendor_commission = ! empty( $vendor_data['commission'] ) ? $vendor_data['commission'] : get_option( 'wcpv_vendor_settings_default_commission', '0' );
             $tzstring          = ! empty( $vendor_data['timezone'] ) ? $vendor_data['timezone'] : '';
